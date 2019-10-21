@@ -10,3 +10,13 @@ ms\do_win64a
 nmake -f ms\nt.mak
 nmake  -f  ms\nt.mak test
 nmake  -f  ms\nt.mak install
+
+
+
+https://blog.csdn.net/liang19890820/article/details/51658574
+perl Configure VC-WIN32 --prefix=E:\OpenSSL		//debug:debug-VC-WIN32, no-asm:perl Configure VC-WIN32 no-asm --prefix=E:\OpenSSL
+ms\do_nasm										//no-asm:ms\do_ms
+vcvars32.bat									//location:D:\Program Files\Microsoft Visual Studio 14.0\VC\bin
+nmake -f ms\ntdll.mak							//location:E:\openssl-1.0.2m, static library:ms\nt.mak
+nmake -f ms\ntdll.mak test						//passed all tests
+nmake -f ms\ntdll.mak install
