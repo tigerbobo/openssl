@@ -13,7 +13,7 @@ COpenSSL::~COpenSSL()
 {
 }
 
-void COpenSSL::openssl_des3(char *input, int type, int mode, unsigned char key[24], unsigned char ivec[8], char **output)
+void COpenSSL::openssl_des3(const char *input, int type, int mode, unsigned char key[24], unsigned char ivec[8], char **output)
 {
 	size_t i, length, block;
 	unsigned char buffer_in[8];
