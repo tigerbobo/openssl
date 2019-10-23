@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "OpenSSL.h"
+#include "openssl.h"
 
 #pragma comment(lib, "libeay32.lib")
 
