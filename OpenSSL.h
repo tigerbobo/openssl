@@ -15,6 +15,6 @@ public:
 	COpenSSL();
 	~COpenSSL();
 public:
-	static void openssl_des3(char *input, int type, int mode, unsigned char key[24], unsigned char ivec[8], char **output);
+	static void openssl_des3(const char *input, int type, int mode, unsigned char key[24], unsigned char ivec[8], char **output);
 };
 
