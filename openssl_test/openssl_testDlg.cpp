@@ -8,8 +8,10 @@
 #include "afxdialogex.h"
 
 #include <memory>
+#include <algorithm>
 
 #include "openssl\OpenSSL.h"
+#include "stdstring\stdstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -164,7 +166,45 @@ HCURSOR Copenssl_testDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void HexArrayToHexString(unsigned char* bBuffer, int nBufferLength, stdstring &strHexString)
+{
+	int i;
+	TCHAR buffer[3] = { 0 };
 
+	strHexString = _T("");
+
+	for (i = 0; i<nBufferLength; i++)
+	{
+		_stprintf_s(buffer, _countof(buffer), _T("%02x"), bBuffer[i]);
+
+		strHexString += buffer;
+	}
+
+	std::transform(strHexString.begin(), strHexString.end(), strHexString.begin(), ::toupper);
+}
+
+void HexStringToHexArray(stdstring strHexString, unsigned char* bBuffer, unsigned int &nBufferLength)
+{
+	TCHAR buffer[3];
+	stdstring string;
+	unsigned int i, length;
+
+	string = strHexString;
+	length = string.length() / 2;
+
+	if (length>nBufferLength)
+		length = nBufferLength;
+
+	memset(buffer, 0, sizeof(buffer));
+
+	for (i = 0; i<length; i++)
+	{
+		_tcsnccpy_s(buffer, 3, strHexString.c_str() + i * 2, 2);
+		bBuffer[i] = (unsigned char)(_tcstol(buffer, NULL, 16));
+	}
+
+	nBufferLength = length;
+}
 
 void Copenssl_testDlg::OnBnClickedBEnc()
 {
@@ -172,6 +212,7 @@ void Copenssl_testDlg::OnBnClickedBEnc()
 	UpdateData(TRUE);
 
 	char *output;
+	stdstring str;
 	CStringA input(m_input);
 	std::shared_ptr<char> ptr;
 	unsigned char key[24], ivec[8];
@@ -182,7 +223,9 @@ void Copenssl_testDlg::OnBnClickedBEnc()
 	COpenSSL::openssl_des3(input.GetBuffer(), DES_ENCRYPT, m_mode, key, ivec, &output);
 	ptr.reset(output);
 
-	m_output = output;
+	HexArrayToHexString((unsigned char*)output, strlen(output), str);
+
+	m_output = str.c_str();
 	UpdateData(FALSE);
 }
 
@@ -192,16 +235,22 @@ void Copenssl_testDlg::OnBnClickedBDec()
 	// TODO: Add your control notification handler code here
 	UpdateData(TRUE);
 
-	char *output;
-	CStringA input(m_input);
-	std::shared_ptr<char> ptr;
+	unsigned int length;
+	char *input, *output;
 	unsigned char key[24], ivec[8];
+	std::shared_ptr<char> ptr_in, ptr_out;
 
 	memset(key, 1, sizeof(key));
 	memset(ivec, 0, sizeof(ivec));
 
-	COpenSSL::openssl_des3(input.GetBuffer(), DES_DECRYPT, m_mode, key, ivec, &output);
-	ptr.reset(output);
+	length = (unsigned int)(m_input.GetLength() / 2 + 1);
+	input = new char[length];
+	ptr_in.reset(input);
+
+	HexStringToHexArray(m_input.GetBuffer(), (unsigned char*)input, length); m_input.ReleaseBuffer();
+
+	COpenSSL::openssl_des3(input, DES_DECRYPT, m_mode, key, ivec, &output);
+	ptr_out.reset(output);
 
 	m_output = output;
 	UpdateData(FALSE);
